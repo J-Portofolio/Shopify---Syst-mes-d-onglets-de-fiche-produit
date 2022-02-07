@@ -1,0 +1,33 @@
+function dateconversion() {
+	var Datefrutc = new Date(new Date().getTime() + (-120  * 1000));
+  	return Datefrutc;
+}
+
+function isTime(heureutc) {
+  var Datefr = dateconversion();
+  	if (Datefr.getHours() >= parseInt(heureutc)) {
+      	return true;
+    }
+  
+  	else {
+      	return false;
+    }
+ 
+}
+
+function expirationcalcul() {
+  	var cookieexpiration = dateconversion();
+  	var addday = 0;
+  	var addtime = 0;
+  	if (isTime('16')) {
+  		addday = 1*24*60*60*1000;
+  	}
+    cookieexpiration.setTime(cookieexpiration.getTime() + addday);
+  	cookieexpiration.setHours(16, 0, 0);
+  	cookieexpiration.toUTCString();
+  	//cookieexpiration = new Date(cookieexpiration.toUTCString());
+  	return "expires="+ cookieexpiration;
+}
+
+export { isTime };
+export { expirationcalcul };

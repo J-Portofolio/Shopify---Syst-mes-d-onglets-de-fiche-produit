@@ -1,0 +1,64 @@
+import { setCookie } from "{{ 'customcookies.js' |asset_url }}"
+import { isTime } from "{{ 'Datesjs.js' |asset_url }}"
+
+{% assign France = "4,8" | split: "," %}
+{% assign Europe = "5,12" | split: "," %}
+{% assign Monde = "7,15" | split: "," %}
+
+function getdeliverydays(country) {
+  	var dejour;
+  	var ajour;
+	if (country.toUpperCase() === 'FRANCE') {
+    	dejour = Number({{France[0] | json}});
+      	ajour = Number({{France[1] | json}});
+    }
+
+    else {
+    	if (country === 'Europe') {
+        	dejour = Number({{Europe[0] | json}});
+            ajour = Number({{Europe[1] | json}});
+        }
+
+        else if (country === 'Monde') {
+        	dejour = Number({{Monde[0] | json}});
+            ajour = Number({{Monde[1] | json}});
+        }
+
+	}
+  	return [dejour,ajour];
+
+}
+
+function countbusinessdays(days) {
+  	var i;
+  	var date = Date.today();
+  
+  	if (isTime('16')) {
+    	date.addDays(1);  
+    }
+
+	for (i = 0; i < days; i++) {
+  		date.addDays(1);
+      	if (date.is().saturday() || date.is().sunday()) {
+        	date.next().monday();
+        }
+	}
+  	return date;
+}
+
+function deliveryestimation(country) {
+	var jours = getdeliverydays(country);	
+    var fromDate = countbusinessdays(jours[0]);
+    var toDate = countbusinessdays(jours[1]);
+
+    if (fromDate && toDate || fromDate & toDate !== "undefined") {
+    	fromDate = fromDate.toString('dddd d MMMM yyyy');
+        toDate = toDate.toString('dddd d MMMM yyyy');
+		var array = [fromDate,toDate];
+        array = array[0]+","+array[1];
+      	setCookie('deliveryestimation',array);
+        return;
+	}
+}
+
+export {deliveryestimation};
