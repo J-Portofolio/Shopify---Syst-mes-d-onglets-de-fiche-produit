@@ -1,0 +1,83 @@
+import * as cookies from "{{ 'customcookies.js' |asset_url }}"
+const dynamicloadjsfile =  "{{ 'dynamicl.js' |asset_url }}";
+
+function setdeliverycontent(pays, deliveryestimation) {
+  	deliveryestimation = deliveryestimation.split(',');
+	var genericcontent = document.getElementById('generic-delivery'), index;
+    genericcontent.parentNode.removeChild(genericcontent);
+    document.getElementById('gestimatedcontent').innerHTML += '<br/>En <span class="deliverycountry">'+ pays +'</span>, entre:<br/> <span id="fromDate" class="deliverydate"></span> et <span id="toDate" class="deliverydate"></span>.';
+    if (pays[0] == 'France') {
+    	document.getElementById('gestimatedcontent').parentNode.innerHTML += '<p><strong>La livraison est gratuite.</strong></p>';
+    }
+    document.getElementById('fromDate').innerHTML = deliveryestimation[0];
+    document.getElementById('toDate').innerHTML = deliveryestimation[1];
+  	return;
+}
+
+function updatedeliverycontent() {
+  	var pays = cookies.checkCookie('paysvisiteur');  
+  	var deliveryestimation = cookies.checkCookie('deliveryestimation');
+
+    if (pays) {
+      	pays = cookies.getCookie('paysvisiteur');
+      	pays = pays.split('|');     
+      	if (!deliveryestimation) {
+            import(dynamicloadjsfile).then((dynamicload) => {
+              dynamicload.loadjs('{{ 'dates-fr-fr.js' | asset_url }}', false, true)
+                  .then(
+                      () => {
+                		console.log('Dépendance chargée');
+                          dynamicload.loadjs('{{ 'Datesjs.js' |asset_url }}', true, true)
+                              .then(
+                                  () => {
+                            		console.log('Dépendance chargée');
+                					const deliverycalculfile =  "{{ 'estimate-delivery.js' |asset_url }}";
+                                  	import(deliverycalculfile).then((deliverycalcul) => {
+                                      if (pays[0].toUpperCase() === 'FRANCE') {
+                                        deliverycalcul.deliveryestimation(pays[0]);
+                                      }
+                                      else {
+                                        deliverycalcul.deliveryestimation(pays[1]);
+                                      }
+                                      deliveryestimation = cookies.getCookie('deliveryestimation');
+                                      setdeliverycontent(pays[0], deliveryestimation);
+                                      return;
+                                    });
+                                  },
+                                  (err) => {
+              							console.loag(err);
+                                      return false;
+                                  }
+                              );
+                      },
+                      (err) => {
+                        	console.loag(err);
+                          return false;
+                      }
+                  );
+          });
+    	}
+      
+      	else if (deliveryestimation) {
+          deliveryestimation = cookies.getCookie('deliveryestimation');
+          setdeliverycontent(pays[0], deliveryestimation);
+          return;
+        }
+    }
+  
+}
+
+var pays = cookies.checkCookie('paysvisiteur');  
+
+if (!pays) {
+    const requeteinfosfile =  "{{ 'infosrequests.js' |asset_url }}"
+    import(requeteinfosfile).then((request) => {
+		request.requeteinfos('paysvisiteur');
+    });
+}
+
+else {
+	updatedeliverycontent()  ;
+}
+
+export {updatedeliverycontent};
