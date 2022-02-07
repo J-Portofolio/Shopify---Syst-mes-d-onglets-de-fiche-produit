@@ -1,0 +1,42 @@
+import { expirationcalcul } from "{{ 'Datesjs.js' |asset_url }}"
+
+function setCookie(cname, cvalue) {
+  var expires = expirationcalcul(),
+  hostname = document.location.hostname.replace(/^www\./, ''),
+  cecookie = cname + "=" + cvalue + ";" + " domain=." + hostname + ";" + expires + "; secure; path=/";
+  document.cookie = cecookie;
+}
+
+function getCookie(name) {
+    var dc = document.cookie;
+    var prefix = name + "=";
+    var begin = dc.indexOf("; " + prefix);
+    if (begin == -1) {
+        begin = dc.indexOf(prefix);
+        if (begin != 0) return null;
+    }
+    else
+    {
+        begin += 2;
+        var end = document.cookie.indexOf(";", begin);
+        if (end == -1) {
+        end = dc.length;
+        }
+    }
+    return decodeURI(dc.substring(begin + prefix.length, end));
+}
+
+function checkCookie(name) {
+    var myCookie = getCookie(name);
+
+    if (myCookie == null) {
+      return null;
+    }
+    else {
+        return true;
+    }
+}
+
+export { getCookie };
+export { checkCookie };
+export { setCookie };

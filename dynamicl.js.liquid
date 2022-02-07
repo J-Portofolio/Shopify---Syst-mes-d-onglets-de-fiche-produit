@@ -1,0 +1,23 @@
+ export function loadjs(src, isModule, async, defer) {
+    const script = document.createElement('script');
+
+    if(isModule){
+      script.type = 'module';
+    } else{
+      script.type = 'application/javascript';
+    }
+    if(async){
+      script.setAttribute('async', '');
+    }
+    if(defer){
+      script.setAttribute('defer', '');
+    }
+
+    document.head.appendChild(script);
+
+    return new Promise((success, error) => {
+        script.onload = success;
+        script.onerror = error;
+        script.src = src;// start loading the script
+    });
+}
